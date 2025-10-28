@@ -1,7 +1,7 @@
 # Desarrollo práctica DAW
 ## Preguntas al profesor
 - [ ] El controlador debería hacer uso de *DAOs*??? (Data Access Object) en [[#^1ecec6]] [backend](#v1-mvp-funcional-requisitos-asignatura)
-- [ ] 
+- 
 ## Propuesta Aplicación Web DAW
 ### 🧑‍🍳Recetario Colaborativo
 Plataforma Web donde los usuarios pueden registrarse para compartir sus propias recetas y descubrir las de otros usuarios.
