@@ -1,4 +1,7 @@
 # Desarrollo práctica DAW
+## Preguntas al profesor
+- [ ] El controlador debería hacer uso de *DAOs* (Data Access Object) en [[#^1ecec6]]
+- [ ] 
 ## Propuesta Aplicación Web DAW
 ### 🧑‍🍳Recetario Colaborativo
 Plataforma Web donde los usuarios pueden registrarse para compartir sus propias recetas y descubrir las de otros usuarios.
@@ -37,9 +40,13 @@ Plataforma Web donde los usuarios pueden registrarse para compartir sus propias 
     
     - Se usaría para que un usuario pueda añadir una receta a su lista de "Favoritos" o al "Planificador" con un solo clic y sin recargar la página. También podría usarse para un sistema de valoración por estrellas dinámico.
 ## Roadmap por fases
-
+### Análisis inicial
+- [ ] DRS
+	- [ ] Diagrama de casos de uso
+- [ ] Diagrama de clases
+- [ ] Diagrama entidad relación
 ### V1: MVP Funcional (Requisitos Asignatura)
-- [ ] **Backend:**
+- [ ] **Backend:** ^1ecec6
     - [ ] Implementar patrón MVC (Servlets/JSP).
     - [ ] Configurar acceso a datos (JPA).
 - [ ] **Gestión de Usuarios:**
@@ -57,7 +64,7 @@ Plataforma Web donde los usuarios pueden registrarse para compartir sus propias 
 - [ ] **Frontend (Interacción):**
     - [ ] HTML/CSS/JS (base funcional).
     - [ ] Validación de formularios (JavaScript).
-    - [ ] Peticiones asíncronas (AJAX/Fetch) para "Favoritos".
+    - [ ] Peticiones asíncronas (AJAX/Fetch) para "Favoritos" (**preguntar al profesor. No entiendo bien esta parte**).
 - [ ] **Sistema de Favoritos:**
     - [ ] CRUD de Favoritos (persistente en BBDD, asociado a usuario).
 
@@ -89,6 +96,8 @@ Plataforma Web donde los usuarios pueden registrarse para compartir sus propias 
     - [ ] Añadir atributo "publica" (booleano) a la entidad `Receta`.
     - [ ] Permitir al usuario marcar sus recetas como públicas o privadas.
     - [ ] Lógica de autorización: Recetas privadas solo visibles por el propietario.
+- [ ] **Funcionalidad "Carrito" (Planificador):**
+	- [ ] Ampliar funcionalidad permitiendo al usuario descargar la planificación antes de cerrar sesión. Admitir distintos formatos (pdf, csv, xml)
 
 ## Fases del proyecto detalladas
 ### V1: Producto Mínimo Viable (MVP)
@@ -98,7 +107,6 @@ _Cumplir con requisitos de la guía_
 - **Backend:**
     
     - Implementación del patrón **MVC** con Servlets/JSP.
-        
     - Configuración de la conexión a la base de datos (JPA).
         
 - **Gestión de Usuarios:**
