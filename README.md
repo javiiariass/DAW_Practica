@@ -1,6 +1,6 @@
 # Desarrollo práctica DAW
 ## Preguntas al profesor
-- [ ] El controlador debería hacer uso de *DAOs* (Data Access Object) en [[#^1ecec6]] [](#V1: MVP Funcional (Requisitos Asignatura))
+- [ ] El controlador debería hacer uso de *DAOs* (Data Access Object) en [[#^1ecec6]] [fdf](#V1:-MVP-Funcional-(Requisitos Asignatura))
 - [ ] 
 ## Propuesta Aplicación Web DAW
 ### 🧑‍🍳Recetario Colaborativo
