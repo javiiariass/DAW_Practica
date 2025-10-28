@@ -1,6 +1,6 @@
 # Desarrollo práctica DAW
 ## Preguntas al profesor
-- [ ] El controlador debería hacer uso de *DAOs* (Data Access Object) en [[#^1ecec6]] [backend](#v1-mvp-funcional-requisitos-asignatura)
+- [ ] El controlador debería hacer uso de *DAOs*??? (Data Access Object) en [[#^1ecec6]] [backend](#v1-mvp-funcional-requisitos-asignatura)
 - [ ] 
 ## Propuesta Aplicación Web DAW
 ### 🧑‍🍳Recetario Colaborativo
@@ -208,7 +208,7 @@ El proyecto consiste en una aplicación web desarrollada en Java (stack MVC) que
 
 1.  **Visitante (No autenticado):** Usuario anónimo que puede navegar por el sitio, ver el listado de recetas públicas y buscar recetas.
 2.  **Usuario Registrado (Autenticado):** Usuario que ha iniciado sesión. Tiene todos los permisos del Visitante y, además, puede crear, editar y eliminar sus propias recetas, y gestionar su lista de favoritos.
-3.  **Administrador:** (Definido para V1, pero con funcionalidad limitada). Un tipo de `Usuario Registrado` con permisos para futuras tareas de moderación. En V1, su funcionalidad es idéntica a la del Usuario Registrado.
+3.  **Administrador:** (Definido para V1, pero con funcionalidad limitada). Un tipo de `Usuario Registrado` con permisos para futuras tareas de moderación. En V1, su funcionalidad es idéntica a la del Usuario Registrado. De momento solo se crearán los administradores directamente en la base de datos. No implementaré constructor para administradores.
 
 #### 3. Requisitos Funcionales (RF)
 
@@ -260,135 +260,225 @@ El proyecto consiste en una aplicación web desarrollada en Java (stack MVC) que
 - **V2:** Integración con APIs de webs de stock de imágenes
 - **V2:** Funcionalidad avanzada de `Administrador` (moderación).
 
-### Diagrama de casos de Uso
+### Casos de Uso
 
+Este listado detalla las interacciones funcionales que el sistema debe soportar, agrupadas por el actor que las inicia.
+
+#### 🧑‍💻 Actor: Visitante (No Autenticado)
+
+- **CU-01: Registrarse**
+    
+    - **Descripción:** Permite a un `Visitante` crear una nueva cuenta de `Usuario Registrado` proporcionando un nombre de usuario, email y contraseña.
+        
+- **CU-02: Iniciar Sesión**
+    
+    - **Descripción:** Permite a un usuario autenticarse en el sistema usando su email (o nombre de usuario) y contraseña.
+        
+- **CU-03: Ver Listado de Recetas**
+    
+    - **Descripción:** Permite al `Visitante` ver una lista paginada de todas las recetas públicas disponibles en la plataforma.
+        
+- **CU-04: Ver Detalle de Receta**
+    
+    - **Descripción:** Permite al `Visitante` seleccionar una receta del listado y ver toda su información (ingredientes, instrucciones, imagen, macros, etc.).
+        
+- **CU-05: Buscar Recetas**
+    
+    - **Descripción:** Permite al `Visitante` buscar recetas basándose en un término (ej. por título o descripción).
+        
+- **CU-06: Gestionar Planificador Semanal**
+    
+    - **Descripción:** Permite al `Visitante` añadir o quitar recetas de un planificador de menú temporal. Este planificador **debe usar la Sesión HTTP** y su contenido se perderá al cerrar el navegador (cumpliendo el requisito del "carrito").
+        
+
+
+#### Usuario Registrado (Autenticado)
+
+_(Hereda todos los casos de uso del Visitante y además puede realizar los siguientes)_
+
+- **CU-07: Cerrar Sesión**
+    
+    - **Descripción:** Permite al `Usuario Registrado` invalidar su sesión y salir del sistema.
+        
+- **CU-08: Crear Receta**
+    
+    - **Descripción:** Permite al `Usuario Registrado` rellenar un formulario para publicar una nueva receta, incluyendo la subida de una imagen y la entrada manual (opcional) de macros.
+        
+- **CU-09: Actualizar Receta Propia**
+    
+    - **Descripción:** Permite al `Usuario Registrado` editar la información de una receta que le pertenece. El sistema debe validar que solo el propietario pueda ejecutar esta acción.
+        
+- **CU-10: Eliminar Receta Propia**
+    
+    - **Descripción:** Permite al `Usuario Registrado` eliminar permanentemente una receta que le pertenece. El sistema debe validar la propiedad.
+        
+- **CU-11: Gestionar Favoritos**
+    
+    - **Descripción:** Permite al `Usuario Registrado` marcar o desmarcar una receta como favorita. Esta acción debe ser persistente en la BBDD y realizarse de forma asíncrona (usando **AJAX/Fetch**).
+        
+- **CU-12: Ver Lista de Favoritos**
+    
+    - **Descripción:** Permite al `Usuario Registrado` acceder a una página personal donde se listan todas las recetas que ha marcado como favoritas.
+        
+
+---
+
+#### 🛡️ Actor: Administrador
+
+- **Descripción:** En la V1, el `Administrador` hereda todos los casos de uso del `Usuario Registrado` pero no tiene funcionalidades exclusivas. Su rol se define para futuras extensiones (V2).
+    
+
+---
+
+#### ⚙️ Casos de Uso Internos (Soporte Técnico)
+
+Estos no son iniciados directamente por un actor, sino que son _incluidos_ (`<<include>>`) o _extendidos_ (`<<extend>>`) por otros casos de uso:
+
+- **CU-SEC-01: Validar Formulario (Extensión)**
+    
+    - **Descripción:** El sistema valida los datos de entrada en el cliente (usando **JavaScript**) para los formularios (CU-01, CU-02, CU-08).
+        
+- **CU-SEC-02: Encriptar Contraseña (Inclusión)**
+    
+    - **Descripción:** El sistema aplica un _hash_ seguro a la contraseña del usuario durante el `CU-01: Registrarse` antes de guardarla en la BBDD.
+        
+- **CU-SEC-03: Subir Imagen (Inclusión)**
+    
+    - **Descripción:** El sistema procesa y almacena el archivo de imagen proporcionado durante el `CU-08: Crear Receta`.
+        
+
+### Diagrama de casos de Uso
 ```mermaid
+%% Diagrama de Casos de Uso - V1
+
+%% Tema MVC con estilos coherentes
+
+%% javi (versión 1.0)
+
+  
+
 graph LR
 
-    %% Definición de Actores (Rectángulos estándar)
+    %% ==== ACTORES ====
 
-    Visitante[Visitante]
+    Visitante(["🧑‍💻 Visitante"])
 
-    User[Usuario Registrado]
+    Usuario(["👤 Usuario Registrado"])
 
-    Admin[Administrador]
-
-  
-
-    %% Herencia de Actores (simulada con línea discontinua)
-
-    User -.-> Visitante
-
-    Admin -.-> User
+    Admin(["🛡️ Administrador"])
 
   
 
-    %% Contenedor del Sistema
+    %% ==== HERENCIA DE ACTORES ====
 
-    subgraph "Recetario Colaborativo V1"
+    Usuario -.->|Herencia| Visitante
 
-        %% Casos de Uso Principales (Rectángulos estándar)
-
-        UC1[Registrarse]
-
-        UC2[Iniciar Sesión]
-
-        UC3[Buscar Recetas]
-
-        UC4[Ver Listado Recetas]
-
-        UC5[Ver Detalle Receta]
-
-        UC6[Gestionar Planificador]
-
-        UC7[Cerrar Sesión]
-
-        UC8[Crear Receta]
-
-        UC9[Actualizar Receta Propia]
-
-        UC10[Eliminar Receta Propia]
-
-        UC11[Gestionar Favoritos]
-
-        UC12[Ver Mis Favoritos]
+    Admin -.-> |Herencia|Usuario
 
   
 
-        %% Relaciones de Actores a Casos
+    %% ==== CASOS DE USO VISITANTE ====
 
-        Visitante --> UC1
+    CU01([CU-01: Registrarse])
 
-        Visitante --> UC2
+    CU02([CU-02: Iniciar Sesión])
 
-        Visitante --> UC3
+    CU03([CU-03: Ver Listado de Recetas])
 
-        Visitante --> UC4
+    CU04([CU-04: Ver Detalle de Receta])
 
-        Visitante --> UC5
+    CU05([CU-05: Buscar Recetas])
 
-        Visitante --> UC6
-
-  
-
-        User --> UC7
-
-        User --> UC8
-
-        User --> UC9
-
-        User --> UC10
-
-        User --> UC11
-
-        User --> UC12
+    CU06([CU-06: Gestionar Planificador Semanal])
 
   
 
-        %% Casos de Uso Técnicos (Incluidos / Extendidos)
+    Visitante --> CU01
 
-        subgraph tech [Funcionalidad Técnica Requerida]
+    Visitante --> CU02
 
-            UC_Val_JS["Validar Formulario [JS]"]
+    Visitante --> CU03
 
-            UC_Encrypt[Encriptar Contraseña]
+    Visitante --> CU04
 
-            UC_Upload[Subir Imagen]
+    Visitante --> CU05
 
-            UC_Session[Uso de Sesión]
+    Visitante --> CU06
 
-            UC_AJAX[Uso de AJAX/Fetch]
+  
 
-        end
+    %% ==== CASOS DE USO USUARIO REGISTRADO ====
 
-        %% Relaciones <<include>> (obligatorio) y <<extend>> (opcional)
+    CU07([CU-07: Cerrar Sesión])
 
-        UC1 -->|include| UC_Encrypt
+    CU08([CU-08: Crear Receta])
 
-        UC1 -.->|extend| UC_Val_JS
+    CU09([CU-09: Actualizar Receta Propia])
 
-        UC8 -->|include| UC_Upload
+    CU10([CU-10: Eliminar Receta Propia])
 
-        UC8 -.->|extend| UC_Val_JS
+    CU11([CU-11: Gestionar Favoritos])
 
-        UC6 -->|include| UC_Session
+    CU12([CU-12: Ver Lista de Favoritos])
 
-        UC11 -.->|extend| UC_AJAX
+  
 
-    end
+    Usuario --> CU07
 
-    %% Estilos
+    Usuario --> CU08
 
-    classDef actor fill:#f4f4f4,stroke:#333,stroke-width:2px
+    Usuario --> CU09
 
-    class Visitante,User,Admin actor
+    Usuario --> CU10
 
-    %% Estilo del Subgraph Técnico (usando el ID 'tech')
+    Usuario --> CU11
 
-    %%style tech fill:#f9f9f9,stroke:#ccc,stroke-dasharray: 5 5
+    Usuario --> CU12
+
+  
+
+    %% ==== CASOS DE USO INTERNOS ====
+
+    Validar([<<extend>> CU-SEC-01: Validar Formulario])
+
+    Encriptar([<<include>> CU-SEC-02: Encriptar Contraseña])
+
+    Subir([<<include>> CU-SEC-03: Subir Imagen])
+
+  
+
+    CU01 -.-> Encriptar
+
+    CU08 -.-> Subir
+
+    CU01 -.-> Validar
+
+    CU02 -.-> Validar
+
+    CU08 -.-> Validar
+
+  
+
+    %% ==== ESTILOS ====
+
+    classDef actor fill:#3aa653,stroke:#333,stroke-width:2px,color:#fff;
+
+    classDef usecase fill:#5dade2,stroke:#1f618d,stroke-width:2px,color:#fff;
+
+    classDef internal fill:#bbb,stroke:#555,stroke-width:2px,color:#000,font-style:italic;
+
+  
+
+    class Visitante,Usuario,Admin actor;
+
+    class CU01,CU02,CU03,CU04,CU05,CU06,CU07,CU08,CU09,CU10,CU11,CU12 usecase;
+
+    class Validar,Encriptar,Subir internal;
 ```
+
 ### Diseño del sistema
 #### Diagrama de Clases
+##### Idea básica
 ```mermaid
 classDiagram
 
@@ -480,3 +570,343 @@ direction LR
 
     Usuario "0..*" -- "0..*" Receta : "marca como favorita"
 ```
+##### Integración de Controladores y DAOs
+
+```mermaid
+classDiagram
+
+    %% ENTIDADES JPA (V1)
+
+    direction RL
+
+    class Usuario {
+
+        +Long id
+
+        +String username
+
+        +String email
+
+        +String passwordHash
+
+        +Role role
+
+        +Date createdAt
+
+        +boolean enabled
+
+    }
+
+    <<Entity>> Usuario
+
+  
+
+    class Receta {
+
+        +Long id
+
+        +String titulo
+
+        +String descripcion
+
+        +String instrucciones
+
+        +Integer tiempoMinutos
+
+        +Integer porciones
+
+        +Double calorias nullable
+
+        +Double proteinas nullable
+
+        +Double grasas nullable
+
+        +Double carbohidratos nullable
+
+        +String rutaImagen
+
+        +boolean publica
+
+        +Date createdAt
+
+        +Date updatedAt
+
+        +List~IngredientValue~ ingredientes
+
+    }
+
+    <<Entity>> Receta
+
+  
+
+    class Favorito {
+
+        +Long id
+
+        +Long usuarioId
+
+        +Long recetaId
+
+        +Date addedAt
+
+    }
+
+    <<Entity>> Favorito
+
+  
+
+    %% VALUE OBJECT / EMBEDDABLE (ElementCollection)
+
+    class IngredientValue {
+
+        +String nombre
+
+        +String cantidadTexto
+
+        +Integer orden
+
+    }
+
+    <<ValueObject>> IngredientValue
+
+  
+
+    %% NO PERSISTENTES / SESIÓN / DTO
+
+    class PlanificadorSesion {
+
+        +String sessionId
+
+        +List~Long~ recetaIds
+
+        +addReceta(recetaId: Long)
+
+        +removeReceta(recetaId: Long)
+
+        +export(format: String) : Blob
+
+    }
+
+  
+
+    class SessionUser {
+
+        +Long id           // null si visitante
+
+        +String username   // null si visitante
+
+        +boolean authenticated
+
+        +Set~Role~ roles
+
+        +isAuthenticated(): boolean
+
+    }
+
+  
+
+    %% ENUM
+
+    class Role {
+
+        +USER
+
+        +ADMIN
+
+    }
+
+    <<Enum>> Role
+
+  
+
+    %% CONTROLLERS (MVC) - manejan peticiones, delegan en DAOs
+
+    class UsuarioController {
+
+        +register(req,res)
+
+        +login(req,res)
+
+        +logout(req,res)
+
+        +getPerfil(req,res)
+
+    }
+
+  
+
+    class RecetaController {
+
+        +createReceta(req,res)
+
+        +editReceta(req,res)
+
+        +deleteReceta(req,res)
+
+        +viewReceta(req,res)
+
+        +listRecetas(req,res)
+
+        +uploadImage(req,res)
+
+    }
+
+  
+
+    class FavoritoController {
+
+        +toggleFavorito(req,res)
+
+        +listFavoritos(req,res)
+
+    }
+
+  
+
+    class PlanificadorController {
+
+        +addToPlan(req,res)
+
+        +removeFromPlan(req,res)
+
+        +viewPlan(req,res)
+
+        +exportPlan(req,res)
+
+    }
+
+  
+
+    class AdminController {
+
+        +suspenderUsuario(req,res)
+
+        +eliminarUsuario(req,res)
+
+        +eliminarContenido(req,res)
+
+    }
+
+  
+
+    %% DAOs / Repositorios
+
+    class UsuarioDAO {
+
+        +findById(id)
+
+        +findByUsername(username)
+
+        +save(usuario)
+
+        +delete(id)
+
+    }
+
+  
+
+    class RecetaDAO {
+
+        +findById(id)
+
+        +findPaged(filter)
+
+        +save(receta)
+
+        +delete(id)
+
+    }
+
+  
+
+    class IngredienteDAO {
+
+        +findByRecetaId(recetaId)
+
+        +save(ingrediente)
+
+        +deleteByRecetaId(recetaId)
+
+    }
+
+  
+
+    class FavoritoDAO {
+
+        +findByUsuarioId(userId)
+
+        +exists(userId, recetaId)
+
+        +save(favorito)
+
+        +delete(id)
+
+    }
+
+  
+
+    %% RELACIONES ENTRE ENTIDADES
+
+    Usuario "1" --> "*" Receta : propietario
+
+    Receta "1" --> "0..*" IngredientValue : contiene (ElementCollection)
+
+    Usuario "1" --> "*" Favorito : marca como favorito
+
+    Favorito "*" --> "1" Receta : receta
+
+  
+
+    %% DEPENDENCIAS (Controllers -> DAOs / Sesión)
+
+    UsuarioController ..> UsuarioDAO : usa
+
+    RecetaController ..> RecetaDAO : usa
+
+    RecetaController ..> IngredienteDAO : usa
+
+    FavoritoController ..> FavoritoDAO : usa
+
+    PlanificadorController ..> PlanificadorSesion : usa
+
+    AdminController ..> UsuarioDAO : usa
+
+    AdminController ..> RecetaDAO : usa
+
+  
+
+    %% NOTAS (sintaxis: note for <CLASS> "line1\nline2")
+
+    note for Receta "Macros (calorías, proteínas, grasas, carbohidratos)
+
+    Entrada MANUAL en V1 — campos NULLABLE."
+
+    note for Favorito "Persistente para cumplir RF.3. Mantiene addedAt (timestamp).
+
+    Índice único recomendado (usuario_id, receta_id)."
+
+    note for PlanificadorSesion "Guardado en SESIÓN HTTP (HttpSession).
+
+    No persistente en BBDD en V1 (RF.4)."
+
+    note for SessionUser "DTO de sesión: representa visitante o usuario autenticado.
+
+    SessionUser.anonymous() para visitantes."
+
+    note for UsuarioController "EndPoints /register, /login, /logout, /perfil
+
+    Al autenticar: migrar tempFavorites desde sesión."
+
+    note for RecetaController "EndPoints /recetas (GET|POST|PUT|DELETE), /recetas/{id}
+
+    Autorización: propietario o ADMIN para edit/delete."
+
+    note for FavoritoController "EndPoints /favorito/toggle, /favoritos
+
+    Si no autenticado -> tempFavorites en sesión."
+
+    note for PlanificadorController "EndPoints para gestionar planificador; usa la sesión para almacenar recetaIds."
+```
+
+
+
