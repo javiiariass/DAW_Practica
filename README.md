@@ -569,343 +569,726 @@ direction LR
     %% Una Receta puede ser favorita de 0 o más Usuarios.
 
     Usuario "0..*" -- "0..*" Receta : "marca como favorita"
+    
+    %% Estilos
+
+%% ENTIDADES
+
+    class Usuario:::entity
+
+    class Receta:::entity
+     %% DEFINICIÓN DE ESTILOS
+
+    classDef entity fill:#5dade2,stroke:#1f618d,stroke-width:2px,color:#fff;
 ```
 ##### Integración de Controladores y DAOs
 
 ```mermaid
 classDiagram
 
+  
+
     %% ENTIDADES JPA (V1)
+
+  
 
     direction RL
 
+  
+
     class Usuario {
+
+  
 
         +Long id
 
+  
+
         +String username
+
+  
 
         +String email
 
+  
+
         +String passwordHash
+
+  
 
         +Role role
 
+  
+
         +Date createdAt
+
+  
 
         +boolean enabled
 
+  
+
     }
+
+  
 
     <<Entity>> Usuario
 
   
 
+  
+
     class Receta {
+
+  
 
         +Long id
 
+  
+
         +String titulo
+
+  
 
         +String descripcion
 
+  
+
         +String instrucciones
+
+  
 
         +Integer tiempoMinutos
 
+  
+
         +Integer porciones
+
+  
 
         +Double calorias nullable
 
+  
+
         +Double proteinas nullable
+
+  
 
         +Double grasas nullable
 
+  
+
         +Double carbohidratos nullable
+
+  
 
         +String rutaImagen
 
+  
+
         +boolean publica
+
+  
 
         +Date createdAt
 
+  
+
         +Date updatedAt
+
+  
 
         +List~IngredientValue~ ingredientes
 
+  
+
     }
+
+  
 
     <<Entity>> Receta
 
   
 
+  
+
     class Favorito {
+
+  
 
         +Long id
 
+  
+
         +Long usuarioId
+
+  
 
         +Long recetaId
 
+  
+
         +Date addedAt
 
+  
+
     }
+
+  
 
     <<Entity>> Favorito
 
   
 
+  
+
     %% VALUE OBJECT / EMBEDDABLE (ElementCollection)
+
+  
 
     class IngredientValue {
 
+  
+
         +String nombre
+
+  
 
         +String cantidadTexto
 
+  
+
         +Integer orden
 
+  
+
     }
+
+  
 
     <<ValueObject>> IngredientValue
 
   
 
+  
+
     %% NO PERSISTENTES / SESIÓN / DTO
+
+  
 
     class PlanificadorSesion {
 
+  
+
         +String sessionId
+
+  
 
         +List~Long~ recetaIds
 
+  
+
         +addReceta(recetaId: Long)
+
+  
 
         +removeReceta(recetaId: Long)
 
+  
+
         +export(format: String) : Blob
 
+  
+
     }
+
+  
 
   
 
     class SessionUser {
 
+  
+
         +Long id           // null si visitante
+
+  
 
         +String username   // null si visitante
 
+  
+
         +boolean authenticated
+
+  
 
         +Set~Role~ roles
 
+  
+
         +isAuthenticated(): boolean
 
+  
+
     }
+
+  
 
   
 
     %% ENUM
 
+  
+
     class Role {
+
+  
 
         +USER
 
+  
+
         +ADMIN
 
+  
+
     }
+
+  
 
     <<Enum>> Role
 
   
 
+  
+
     %% CONTROLLERS (MVC) - manejan peticiones, delegan en DAOs
+
+  
 
     class UsuarioController {
 
+  
+
         +register(req,res)
+
+  
 
         +login(req,res)
 
+  
+
         +logout(req,res)
+
+  
 
         +getPerfil(req,res)
 
+  
+
     }
+
+  
 
   
 
     class RecetaController {
 
+  
+
         +createReceta(req,res)
+
+  
 
         +editReceta(req,res)
 
+  
+
         +deleteReceta(req,res)
+
+  
 
         +viewReceta(req,res)
 
+  
+
         +listRecetas(req,res)
+
+  
 
         +uploadImage(req,res)
 
+  
+
     }
+
+  
 
   
 
     class FavoritoController {
 
+  
+
         +toggleFavorito(req,res)
+
+  
 
         +listFavoritos(req,res)
 
+  
+
     }
+
+  
 
   
 
     class PlanificadorController {
 
+  
+
         +addToPlan(req,res)
+
+  
 
         +removeFromPlan(req,res)
 
+  
+
         +viewPlan(req,res)
+
+  
 
         +exportPlan(req,res)
 
+  
+
     }
+
+  
 
   
 
     class AdminController {
 
+  
+
         +suspenderUsuario(req,res)
+
+  
 
         +eliminarUsuario(req,res)
 
+  
+
         +eliminarContenido(req,res)
 
+  
+
     }
+
+  
 
   
 
     %% DAOs / Repositorios
 
+  
+
     class UsuarioDAO {
+
+  
 
         +findById(id)
 
+  
+
         +findByUsername(username)
+
+  
 
         +save(usuario)
 
+  
+
         +delete(id)
 
+  
+
     }
+
+  
 
   
 
     class RecetaDAO {
 
+  
+
         +findById(id)
+
+  
 
         +findPaged(filter)
 
+  
+
         +save(receta)
+
+  
 
         +delete(id)
 
+  
+
     }
+
+  
 
   
 
     class IngredienteDAO {
 
+  
+
         +findByRecetaId(recetaId)
+
+  
 
         +save(ingrediente)
 
+  
+
         +deleteByRecetaId(recetaId)
 
+  
+
     }
+
+  
 
   
 
     class FavoritoDAO {
 
+  
+
         +findByUsuarioId(userId)
+
+  
 
         +exists(userId, recetaId)
 
+  
+
         +save(favorito)
 
+  
+
         +delete(id)
+
+  
 
     }
 
   
 
+  
+
     %% RELACIONES ENTRE ENTIDADES
+
+  
 
     Usuario "1" --> "*" Receta : propietario
 
+  
+
     Receta "1" --> "0..*" IngredientValue : contiene (ElementCollection)
 
+  
+
     Usuario "1" --> "*" Favorito : marca como favorito
+
+  
 
     Favorito "*" --> "1" Receta : receta
 
   
 
+  
+
     %% DEPENDENCIAS (Controllers -> DAOs / Sesión)
+
+  
 
     UsuarioController ..> UsuarioDAO : usa
 
+  
+
     RecetaController ..> RecetaDAO : usa
+
+  
 
     RecetaController ..> IngredienteDAO : usa
 
+  
+
     FavoritoController ..> FavoritoDAO : usa
+
+  
 
     PlanificadorController ..> PlanificadorSesion : usa
 
+  
+
     AdminController ..> UsuarioDAO : usa
+
+  
 
     AdminController ..> RecetaDAO : usa
 
   
 
+  
+
     %% NOTAS (sintaxis: note for <CLASS> "line1\nline2")
+
+  
 
     note for Receta "Macros (calorías, proteínas, grasas, carbohidratos)
 
+  
+
     Entrada MANUAL en V1 — campos NULLABLE."
+
+  
 
     note for Favorito "Persistente para cumplir RF.3. Mantiene addedAt (timestamp).
 
+  
+
     Índice único recomendado (usuario_id, receta_id)."
+
+  
 
     note for PlanificadorSesion "Guardado en SESIÓN HTTP (HttpSession).
 
+  
+
     No persistente en BBDD en V1 (RF.4)."
+
+  
 
     note for SessionUser "DTO de sesión: representa visitante o usuario autenticado.
 
+  
+
     SessionUser.anonymous() para visitantes."
+
+  
 
     note for UsuarioController "EndPoints /register, /login, /logout, /perfil
 
+  
+
     Al autenticar: migrar tempFavorites desde sesión."
+
+  
 
     note for RecetaController "EndPoints /recetas (GET|POST|PUT|DELETE), /recetas/{id}
 
+  
+
     Autorización: propietario o ADMIN para edit/delete."
+
+  
 
     note for FavoritoController "EndPoints /favorito/toggle, /favoritos
 
+  
+
     Si no autenticado -> tempFavorites en sesión."
 
+  
+
     note for PlanificadorController "EndPoints para gestionar planificador; usa la sesión para almacenar recetaIds."
+
+  
+  
+
+%% Estilos
+
+%% ENTIDADES
+
+    class Usuario:::entity
+
+    class Receta:::entity
+
+    class Favorito:::entity
+
+  
+
+ %% VALUE OBJECT
+
+    class IngredientValue:::valueobject
+
+  
+
+    %% SESIÓN / DTO
+
+    class PlanificadorSesion:::session
+
+    class SessionUser:::session
+
+  
+
+    %% ENUM
+
+    class Role:::enum
+
+  
+
+    %% CONTROLLERS
+
+    class UsuarioController:::controller
+
+    class RecetaController:::controller
+
+    class FavoritoController:::controller
+
+    class PlanificadorController:::controller
+
+    class AdminController:::controller
+
+  
+
+    %% DAOS
+
+    class UsuarioDAO:::dao
+
+    class RecetaDAO:::dao
+
+    class IngredienteDAO:::dao
+
+    class FavoritoDAO:::dao
+
+  
+  
+
+     %% DEFINICIÓN DE ESTILOS
+
+    classDef entity fill:#5dade2,stroke:#1f618d,stroke-width:2px,color:#fff;
+
+    classDef valueobject fill:#bbb,stroke:#555,stroke-width:2px,color:#000,font-style:italic;
+
+    classDef session fill:#f5b041,stroke:#935116,stroke-width:2px,color:#000;
+
+    classDef controller fill:#3aa653,stroke:#333,stroke-width:2px,color:#fff;
+
+    classDef dao fill:#999,stroke:#333,stroke-width:1.5px,color:#fff,font-style:italic;
+
+    classDef enum fill:#7d3c98,stroke:#4a235a,stroke-width:2px,color:#fff;
 ```
 
 
