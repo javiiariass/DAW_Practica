@@ -22,7 +22,8 @@ Plataforma Web donde los usuarios pueden registrarse para compartir sus propias 
         
     - Un usuario registrado puede **crear** una nueva receta, subiendo una foto del plato terminado, rellenando ingredientes e instrucciones. También puede **leer** (ver) las suyas y las de otros, **actualizar** sus propias recetas y **borrarlas**.
 	
-> [!info] Posible idea *API*
+> [!note] 
+> **Posible idea *API***
 > Permitir al usuario indicar marcas de los ingredientes que utiliza (si el usuario no quiere, usar productos genéricos en su defecto) y con ellos hacer uso de la API de [OpenFoodFacts](https://es.openfoodfacts.org) para calcular las calorías y macronutrientes de la receta.
 
 - **Funcionalidad del "Carrito"**:
