@@ -1,0 +1,9 @@
+# Ficheros compilados y artefactos de construcción (build)
+/build/
+/dist/
+
+# Configuración privada del IDE (NetBeans)
+/nbproject/private/
+
+# Ficheros de log
+*.log
