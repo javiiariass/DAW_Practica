@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package daw.model;
+package daw.model.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,7 +27,7 @@ import java.util.Date;
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    // ******************* Atributos *******************
+    // ******************* Fields *******************
     // PrimaryKey of DB
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

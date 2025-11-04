@@ -2,8 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package daw.model;
+package daw.model.entity;
 
+import daw.model.valueObject.IngredientValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,6 +14,7 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -28,7 +30,7 @@ public class Recipe implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    // ******************* Atributos *******************
+    // ******************* Fields *******************
     // PrimaryKey of DB
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,7 +49,8 @@ public class Recipe implements Serializable {
     boolean publica;
     Date createdAt;
     Date updatedAt;
-    List<Ingredient> ingredients;
+    // Objeto externo para facilitar migrar si me da tiempo a implementar APIs para calcular macros
+    List<IngredientValue> ingredients;
     
     // ******************* Getters & Setters *******************
     public Long getId() {
