@@ -76,7 +76,8 @@ public class IngredientValue {
 
     @Override
     public String toString() {
-        return "daw.model.valueObject.IngredientValue[ nombre=" + name + ", " + quantityText + " ]";
+        //return "daw.model.valueObject.IngredientValue[ nombre=" + name + ", " + quantityText + " ]";
+        return quantityText + " de " + name;
     }
     
 }
