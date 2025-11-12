@@ -6,5 +6,5 @@
  * Author:  javi
  * Created: 11 nov 2025
  */
-INSERT INTO users (name, email, phone) VALUES('Pepe', 'pepe@correo.es', '11222333')
-INSERT INTO users (name, email, phone) VALUES('John', 'john@correo.es', '223344')
+INSERT INTO users (username, email) VALUES('Pepe', 'pepe@correo.es');
+INSERT INTO users (username, email) VALUES('John', 'john@correo.es');

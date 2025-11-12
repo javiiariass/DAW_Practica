@@ -4,8 +4,9 @@
     <jta-data-source>jdbc/db</jta-data-source>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
-      <property name="jakarta.persistence.schema-generation.database.action" value="create"/>
-      <property name="jakarta.persistence.sql-load-script-source" value="src/java/initTest.sql"/>
+      <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
+      <property name="jakarta.persistence.schema-generation.create-source" value="metadata"/>
+      <property name="jakarta.persistence.sql-load-script-source" value="initTest.sql"/>
     </properties>
   </persistence-unit>
 </persistence>
