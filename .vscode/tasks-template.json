@@ -1,0 +1,68 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Ant: Clean",
+			"type": "shell",
+			"command": "ant",
+			"args": ["clean"],
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"group": "build"
+		},
+		{
+			"label": "Ant: Compile",
+			"type": "shell",
+			"command": "ant",
+			"args": ["compile"],
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"group": "build"
+		},
+		{
+			"label": "Ant: Build (dist)",
+			"type": "shell",
+			"command": "ant",
+			"args": ["dist"],
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "Ant: Rebuild",
+			"type": "shell",
+			"command": "ant",
+			"args": ["clean", "dist"],
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"group": "build"
+		},
+		{
+			"label": "Ant: Test",
+			"type": "shell",
+			"command": "ant",
+			"args": ["test"],
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"group": "test"
+		}
+	]
+}
