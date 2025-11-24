@@ -52,7 +52,24 @@ public class Recipe implements Serializable {
     // Objeto externo para facilitar migrar si me da tiempo a implementar APIs para calcular macros
     List<IngredientValue> ingredients;
     
+    // ******************* Constructors *******************
+    public Recipe() {
+    }
+
+    public Recipe(String titulo, String instrucciones) {
+        this.titulo = titulo;
+        this.instrucciones = instrucciones;
+    }
+
     // ******************* Getters & Setters *******************
+    public String getName() {
+        return titulo;
+    }
+
+    public String getInstructions() {
+        return instrucciones;
+    }
+
     public Long getId() {
         return id;
     }
