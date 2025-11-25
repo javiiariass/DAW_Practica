@@ -1,0 +1,49 @@
+TEMPLATES
+
+Opción 1: Usar fragmentos de JSP incorporados, de forma estática, en todas las vistas.
+
+Crear las vistas con la siguiente estructura
+
+<%@include  file="jspf/header.jspf" %>
+
+<div class="container">
+    <h1>Título</h1>
+</div>
+
+<%@include  file="jspf/footer.jspf" %>   
+
+En este ejemplo, será necesario haber creado los fragmentos en el directorio jspf, pero tú puedes usar la ubicación que desees, cambiándolo en el include.
+
+En el controlador se indica la vista a abrir, tal como se había hecho hasta ahora.
+
+
+
+Opción 2: Crear un template que carga, de forma dinámica, la parte diferente de la vista, pasando su nombre desde el controlador como un atributo de la petición.
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+  </head>
+  <body>
+	<header>
+    	  <h1>Título</h1>
+	</header>
+	<nav> Menú </nav>
+    
+    
+    	<jsp:include page="contents/${requestScope.view}.jsp" />
+    
+
+	<footer>
+	  &copy; 2024. Desarrollo de Aplicaciones Web.
+	</footer>
+   
+  </body>
+</html>
+
+En el controlador se abre siempre la vista template pero se le pasa un atributo de petición con la vista a abrir.
+En este ejemplo, será necesario crear las vistas en la carpeta contents (pero tú puedes usar la ubicación que desees).
+

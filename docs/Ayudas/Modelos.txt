@@ -1,0 +1,217 @@
+
+
+Ayuda Modelos
+=============
+
+Users -----1:1---> Perfil
+		`--1:M---> Productos
+		`--M:M---> Direcciones
+
+
+Perfil
+------
+
+Atributos
+
+    private String photo;
+    private String facebook;
+	
+	// Podría tener:
+	@OneToOne(mappedBy="perfil")
+    private Users owner;
+
+
+Productos
+---------
+
+    private String name;
+    private float price;
+    private int stock;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    private Users user;
+
+Direcciones
+-----------
+
+    private String street;
+    private int number;
+    private String city;
+    private String State;
+    private String postalCode;
+	
+	// Podría tener    
+    @ManyToMany(mappedBy="address")
+    private List<Users> users;
+
+
+Users
+-----
+
+NamedQueries
+
+@Entity
+@Table(name="users")
+@NamedQueries({
+@NamedQuery(name="Users.findAll", query="SELECT u FROM Users u"),
+@NamedQuery(name="Users.findByName", query="SELECT u FROM Users u WHERE u.name = :name"),
+})
+
+Atributos
+
+private String name;
+private String email;
+private String phone;
+
+@OneToOne
+private Perfil perfil;
+
+// Podría tener
+@OneToMany(mappedBy="user", cascade = CascadeType.PERSIST)
+private List<Product> produtcs;
+
+@ManyToMany
+private List<Address> address;
+
+
+Controlador de Prueba
+=====================
+
+Inyectar Unidad de Persistencia
+
+    @PersistenceContext(unitName = "WebAppPU")
+    private EntityManager em;
+    @Resource
+    private UserTransaction utx;
+    private static final Logger Log = Logger.getLogger(UserController.class.getName());
+	
+	
+processRequest
+
+        String vista;
+        
+        Users u = em.find(Users.class, 2L);
+        
+        List<Users> users;
+        TypedQuery<Users> q1 = em.createNamedQuery("Users.findByName", Users.class);
+        q1.setParameter("name", "John");
+        users = q1.getResultList();
+        
+
+        if (users == null) {
+            vista = "error";
+        } else {
+            u = users.get(0);
+            if (request.getServletPath().equals("/insertar")) {
+
+                // PERFIL
+                Perfil p = new Perfil();
+                p.setFacebook("facebook");
+                p.setPhoto("photo");
+
+                u.setPerfil(p);
+                Log.log(Level.INFO, "Perfil creado");
+
+                try {
+                    utx.begin();
+                    em.persist(p);
+                    em.merge(u);
+                    utx.commit();
+                } catch (Exception e) {
+                    Log.log(Level.SEVERE, "exception caught", e);
+                    throw new RuntimeException(e);
+                }
+
+                // Productos
+                Product p1 = new Product();
+                p1.setName("Art1");
+                p1.setPrice(100);
+
+                p1.setUser(u);
+
+                Product p2 = new Product();
+                p2.setName("Art2");
+                p2.setPrice(200);
+                p2.setUser(u);
+
+                try {
+                    utx.begin();
+                    em.persist(p1);
+                    em.persist(p2);
+                    utx.commit();
+                } catch (Exception e) {
+                    Log.log(Level.SEVERE, "exception caught", e);
+                    throw new RuntimeException(e);
+                }
+
+                // Direcciones
+                Address d1 = new Address();
+                d1.setStreet("Calle1");
+                Address d2 = new Address();
+                d2.setStreet("Calle2");
+
+                List<Address> ld = new ArrayList<>();
+                ld.add(d1);
+                ld.add(d2);
+
+                u.setAddress(ld);
+
+                try {
+                    utx.begin();
+                    em.merge(u);
+                    utx.commit();
+                } catch (Exception e) {
+                    Log.log(Level.SEVERE, "exception caught", e);
+                    throw new RuntimeException(e);
+                }
+
+            }
+
+            if (request.getServletPath().equals("/consultar")) {
+
+                TypedQuery<Users> q = em.createQuery("SELECT u FROM Users u WHERE u.name=:name", Users.class);
+                q.setParameter("name", "John");
+                List<Users> lu = q.getResultList();
+                u = lu.get(0);
+                if (u != null) {
+                    Log.log(Level.INFO, "User: " + u.getName());
+                    
+                    Perfil p = u.getPerfil();
+                    
+                    List<Product> lp = u.getProdutcs();
+                    List<Address> ld = u.getAddress();
+                    Log.log(Level.INFO, "Perfil: " + p.getPhoto());
+
+                    for (Address d : ld) {
+                        Log.log(Level.INFO, "Dir: " + d.getStreet());
+                    }
+
+                    for (Product pd : lp) {
+                        Log.log(Level.INFO, "Producto: " + pd.getName());
+                    }
+                } else  {
+                    Log.log(Level.INFO, "User not found!!");
+                }
+
+            }
+        }
+
+        List<Users> lu;
+        TypedQuery<Users> q = em.createNamedQuery("Users.findAll", Users.class);
+        lu = q.getResultList();
+        request.setAttribute("users", lu);
+        vista = "users";
+
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/" + vista + ".jsp");
+        rd.forward(request, response);
+
+
+Base de datos (datos iniciales)
+=============
+persistence.xml
+
+<property name="jakarta.persistence.sql-load-script-source" value="data.sql"/>
+
+fichero data.sql
+INSERT INTO users (name, email, phone) VALUES('Pepe', 'pepe@correo.es', '11222333')
+INSERT INTO users (name, email, phone) VALUES('John', 'john@correo.es', '223344')

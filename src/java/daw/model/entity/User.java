@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
@@ -22,12 +23,40 @@ import java.util.Date;
 @Table(name = "users")
 @NamedQueries({
     @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
-    @NamedQuery(name = " User.findByName", query = "SELECT u FROM User u WHERE u.name = :name")
+    @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE u.username = :username")
 })
 public class User implements Serializable {
 
+    // ******************* jakarta *******************
+    // Se ejecuta antes de persistir en la base de datos
+    @PrePersist
+    protected void onCreate(){
+        // Establecemos el tiempo de creacion al guardar en la base de datos
+        this.createdAt = new Date();
+    }
+    
     private static final long serialVersionUID = 1L;
+    
+    // ******************* Ctor *******************
+    
+    public User() {
+    }
+    
+    public User(String username, String email, String passwordHash) {
+        this.role = Role.user;
+        this.username = username;
+        this.email = email;
+        this.passwordHash = passwordHash;
+    }
+    
+    
+    
     // ******************* Fields *******************
+    public enum Role{
+        user,
+        moderator,
+        admin
+    } 
     // PrimaryKey of DB
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +64,9 @@ public class User implements Serializable {
     String username; // Deberia ser unico tambien
     String email;
     String passwordHash;
-    //Role role; Para asignar rol(admin,user)
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    Role role;
+    @jakarta.persistence.Temporal(jakarta.persistence.TemporalType.TIMESTAMP)
     Date createdAt; // Fecha creacion cuenta
     //boolean enabled; // Para gestionar la suspuension de cuentas más adelante
 
@@ -71,6 +102,14 @@ public class User implements Serializable {
 //    public void setPasswordHash(String passwordHash) {
 //        this.passwordHash = passwordHash;
 //    }
+
+    public void setRole(Role r){
+        this.role = r;
+    }
+
+    public Role getRole(){
+        return role;
+    }
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -78,6 +117,14 @@ public class User implements Serializable {
 //    public void setCreatedAt(Date createdAt) {
 //        this.createdAt = createdAt;
 //    }
+
+
+
+    // *********************** Methods ***********************
+    
+    
+    
+    // *********************** Overrides ***********************
     @Override
     public int hashCode() {
         int hash = 0;
@@ -87,7 +134,6 @@ public class User implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof User)) {
             return false;
         }

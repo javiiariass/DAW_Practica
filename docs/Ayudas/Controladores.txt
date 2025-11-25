@@ -1,0 +1,430 @@
+
+Ayuda Controladores
+===================
+
+
+- Controlador Test2Controller
+
+	URLs: /test2 y /test2/*
+	@WebServlet(name = "Test2Controller", urlPatterns = {"/test2", "/test2/*"})
+	-- También se puede crear el descriptor de la aplicación (web.xml) y establecerlas ahí.
+	
+	doGet()/doPost()
+		
+		- Cabeceras
+			System.out.println("user-Agent: " + request.getHeader("user-Agent"));
+			
+		- ContextPath, ServletPath, PathInfo, Parameters
+		http://host:port/ContextPath/ServletPath/PathInfo?q1=v1&q2=v2
+		
+			String cp = request.getContextPath();
+			String sp = request.getServletPath();
+			String pi = request.getPathInfo();
+			String name = request.getParameter("name");
+			
+			System.out.println("Context Path: " + cp);
+			System.out.println("Servlet Path: " + sp);
+			System.out.println("Path Info: " + pi);
+			System.out.println("Parameter: " + name);
+			
+		- MVC: Delegar petición a la vista
+		
+			RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/test2.jsp");
+			rd.forward(request, response);
+			
+		- Acciones: /app/servlet/action	-> /app/user/new	/app/user/delete	/app/user/...
+		
+			String action;
+			String vista;
+			// ...
+			switch (action) {
+				case "accion1":
+					// accion1
+					vista = "a1";
+					break;
+				case "accion2":
+					// accion2
+					vista = "a2";
+					break;	
+				default:
+					vista = "d";
+					break;
+			}
+			RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/"+vista+".jsp");
+			rd.forward(request, response);
+		
+		
+		- Ejemplo: test2	home - login - mostrar/Pepe
+		http://localhost:8081/app/test2/home
+		
+		Vistas: home - login - test2
+		
+		String vista;
+        String accion="default";
+        String name=null;
+        if(pi!=null) {
+            String valores[];
+            valores = pi.split("/");
+            if(valores.length>1) accion = valores[1];
+            if(valores.length>2) name = valores[2];
+            System.out.println("Accion: " + accion + "\t nombre: " + name);
+        }
+        
+        switch (accion) {
+            case "home":
+                // Página Principal
+                vista = "home";
+                break;
+            case "login":
+                // Mostrar el formulario de login
+                vista = "login";
+                break;	
+            default:
+                //request.setAttribute("nombre", "Pepe");
+                vista = "test2";
+                break;
+        }
+        
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/"+vista+".jsp");
+        rd.forward(request, response);
+		
+		Vista test2.jsp
+		---------------
+		<h1>Test 2!</h1>      
+        <h2>Hola <%= request.getAttribute("nombre") %> </h2>
+        <h2>Hola ${requestScope.nombre} </h2>
+		
+		
+- Controlador UserController
+	REVISAR: Lo que tenemos
+	
+	Peticiones:	GET		/users				: Muestra listado con usuarios
+				GET		/user/new			: Abre el formulario (formUsers) para crear usuario
+				POST	/user/save			: recibe formulario y crea usuario
+	NUEVA:	
+				GET		/user/delete/<id>	: Eliman el usuario con clave <id>
+	
+	doGet():
+	--------
+	
+	    String vista;
+        String msg="OK";
+        String accion = "/users";
+        if (request.getServletPath().equals("/user")) {
+            if (request.getPathInfo() != null) {
+                accion = request.getPathInfo();
+            } else {
+                accion = "error";
+            }
+        }
+        switch (accion) {
+            case "/users" -> {
+                List<Users> lu;
+                TypedQuery<Users> q = em.createNamedQuery("Users.findAll", Users.class);
+                lu = q.getResultList();
+                request.setAttribute("users", lu);
+                vista = "users";
+            }
+            case "/new" -> {
+                vista = "formUsers";
+            }
+            case "/delete" -> {
+                
+                String id_str =  request.getParameter("id");
+                Long id;
+                if (id_str != null) {
+                    id = Long.valueOf(id_str);
+                    Users u = em.find(Users.class, id);
+                    if (u != null) {
+                        try {
+                            utx.begin();
+                            u = em.find(Users.class, u.getId());
+                            em.remove(u);
+                            utx.commit();
+                        } catch (Exception ex) {
+                            Log.log(Level.SEVERE, "EXCEPTION: ", ex);
+                            msg = "ERROR1: Petición no válida";
+                        }
+                    } else {
+                        msg = "ERROR2: Petición no válida";
+                    }
+                } else {
+                    msg = "ERROR3: Petición no válida";
+                }
+                vista = "redirect";
+            }            
+            default -> {
+                vista = "error";
+            }
+        }
+        Log.log(Level.INFO, "MENSAJE: " + msg);
+        if ("redirect".equals(vista)) {
+            response.sendRedirect("http://localhost:8081/app/users");
+        } else {
+            RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/" + vista + ".jsp");
+            rd.forward(request, response);
+        }
+		
+	
+	doPost():
+	---------
+	
+	    String accion = request.getPathInfo();
+        if (accion.equals("/save")) {
+            String name = request.getParameter("name");
+            String email = request.getParameter("email");
+            String phone = request.getParameter("phone");
+            try {
+                if (name.isEmpty() || email.isEmpty() || phone.isEmpty()) {
+                    throw new NullPointerException();
+                }
+                Users u = new Users(name, email, phone);
+                save(u);
+                response.sendRedirect("http://localhost:8081/app/users");
+            } catch (Exception e) {
+                request.setAttribute("msg", "Error: datos no válidos");
+                RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/error.jsp");
+                rd.forward(request, response);
+            }
+        } else {
+            RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/error.jsp");
+            rd.forward(request, response);
+        }
+		
+		
+		
+
+
+
+
+- Controlador: ProfileController
+	Peticiones: GET:  	/profile/id	: Muestra el perfil si existe o abre el formulario (formProfile) para crear el perfil
+				POST:	/profile		: recibe el formulario del perfil, lo asigna al usuario y lo guarda si está todo correcto 
+
+	URL: @WebServlet(name = "ProfileController", urlPatterns = {"/profile"})
+
+	// Unidad de Persistencia
+	@PersistenceContext(unitName = "WebAppPU")
+	private EntityManager em;
+	@Resource
+	private UserTransaction utx;
+	private static final Logger Log = Logger.getLogger(UserController.class.getName());
+	//import java.util.logging.Logger;
+	//import java.util.logging.Level;
+
+doGet():
+--------
+
+        
+        
+        String msg;
+        String vista = "users";
+        String accion="test2";
+        String id_str;
+        Long id=null;
+		String pi = request.getPathInfo();
+        if(pi!=null) {
+            String valores[];
+            valores = pi.split("/");
+            if(valores.length>1) id = Long.valueOf(valores[1]);
+            System.out.println("Accion: " + accion + "\t id: " + id);
+        } 
+        if (id != null) {
+
+            Users u = em.find(Users.class, id);
+            if (u != null) {
+
+                request.setAttribute("id", u.getId());
+                request.setAttribute("user", u);
+                
+                if (u.getProfile()!=null) vista = "userData";
+                else vista = "formProfile";
+
+            } else {
+                msg = "ERROR: Petición no válida";
+            }
+
+        } else {
+
+            msg = "ERROR: Petición no válida";
+        }
+
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/"+vista+".jsp");
+        rd.forward(request, response);
+
+
+
+	- @MultipartConfig
+	
+	- Formulario: enctype="multipart/form-data"
+
+
+
+doPost()
+--------
+
+        String id_str = request.getParameter("id");
+        System.out.println("ID: " + id_str);
+        Long id;
+        String msg = "OK";
+
+        if (id_str != null) {
+            id = Long.valueOf(id_str);
+
+            Users u = em.find(Users.class, id);
+            
+            System.out.println("USER: " + u.getName());
+
+            if (u != null) {
+
+                String instagram = request.getParameter("instagram");
+                try {
+
+                    if (instagram.isEmpty()) {
+                        throw new NullPointerException();
+                    }
+
+                    final Part imgPart = request.getPart("photo");
+                    if (imgPart != null) {
+
+                        String relativePathFolder = "" + File.separator + "img" + File.separator + "photos";
+                        Log.log(Level.INFO, "webPath: " + relativePathFolder);
+                        String absolutePathFolder = getServletContext().getRealPath(relativePathFolder);
+                        Log.log(Level.INFO, "Path: " + absolutePathFolder);
+
+                        Profile p = new Profile();
+                        p.setInstagram(instagram);
+                        String fileName = "photo-" + u.getId().toString();
+                        p.setPhoto(fileName);
+
+                        u.setProfile(p);
+
+                        utx.begin();
+                        //em.persist(p);
+                        em.merge(u);
+                        utx.commit();
+
+                        File f = new File(absolutePathFolder + File.separator + fileName + ".jpg");
+                        OutputStream fos = new FileOutputStream(f);
+                        InputStream filecontent = imgPart.getInputStream();
+                        int read = 0;
+                        final byte[] bytes = new byte[1024];
+                        while ((read = filecontent.read(bytes)) != -1) {
+                            fos.write(bytes, 0, read);
+                        }
+
+                        fos.close();
+                        filecontent.close();
+
+                    }
+                    
+                    request.setAttribute("user", u);
+
+                } catch (Exception ex) {
+                    Log.log(Level.WARNING, "ERROR: Perfil no guardado" , ex);
+                    msg = "ERROR: Perfil no guardado";
+                }
+
+            } else {
+                msg = "ERROR: Petición no válida 1";
+            }
+
+        } else {
+
+            msg = "ERROR: Petición no válida 2";
+        }
+
+        Log.log(Level.INFO, msg);
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/userData.jsp");
+        rd.forward(request, response);
+		
+
+-- Vistas
+
+--- UserProfile
+
+        <h1>Perfil Usuario!</h1>
+
+
+        <c:if test="${!empty requestScope.user}">
+            <p><img src="\app\img\photos\photo-${user.id}.jpg" /></p>
+            <p>Nombre: ${user.name}</p>
+            <p>Email: ${user.email}</p>
+            <p>Phone: ${user.phone}</p>
+            <p>Instagram: ${user.profile.instagram}</p>
+        </c:if>
+
+        <a href="/app/users">Inicio</a>
+        <a href="/app/user/edit?id=${user.id}">Editar</a>
+
+--- FormProfile
+        <h1>Web App</h1>
+        <h3>Alta Pefil de Usuario</h3>
+        <form id="formulario2" action="/app/profile" method="POST" enctype="multipart/form-data">
+            <label for="instagram">Instagram:</label>
+            <input id="instagram" type="text" name="instagram"><br />
+            <label for="photo">Foto:</label>
+            <input id="photo" type="file" name="photo"><br />
+ 
+            <input type="hidden" name="id" value="${requestScope.id}">
+            <input type="submit" value="Guardar" />
+        </form>
+        <a href="/app/users">Inicio</a>
+
+        <script src="/app/js/functions.js"></script
+		
+--- FormEditUser
+        <h1>Web App</h1>
+        <h3>Editar Usuario</h3>
+        <form id="formulario1" action="/app/user/update" method="POST">
+            <label for="name">Nombre:</label>
+            <input id="name" type="text" name="name" value="${user.name}"><br />
+            <label for="email">Correo:</label>
+            <input id="email" type="text" name="email" value="${user.email}"><br />
+            <label for="phone">Teléfono: </label>
+            <input id="phone" type="text" name="phone" value="${user.phone}"><br />
+
+            <label for="instagram">Instagram:</label>
+            <input id="instagram" type="text" name="instagram" value="${user.profile.instagram}"><br />
+                   
+            <label for="photo">
+                <c:if test="${!empty requestScope.user.profile}">
+                    <img src="\app\img\photos\photo-${user.id}.jpg" />
+                </c:if>
+                <c:if test="${empty requestScope.user.profile}">
+                    <img src="\app\img\photos\photo-default.jpg" />
+                </c:if>
+            </label>
+            <input id="photo" type="file" name="photo"><br />
+            
+            <input type="hidden" name="id" value="${user.id}">
+            <input type="submit" value="Update" />
+        </form>
+        <a href="/app/users">Inicio</a>
+        
+        <script src="/app/js/functions.js"></script>
+
+
+
+-- CSS
+
+td a {
+    display:inline-block;
+    width: 50px;
+    margin: 1px;
+    padding: 2px 2px;
+    text-decoration:none;
+    text-align: center;
+    background-color: darkblue;
+    color: white;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+-- JavaScript 
+function checkDelete(id, name) {
+    let ok = confirm("¿Quieres ón Borrar Usuario " + id + " - " + name + "?");
+    console.log(ok);
+    return ok;
+}
