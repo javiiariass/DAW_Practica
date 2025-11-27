@@ -8,6 +8,9 @@ import daw.model.dao.UserDAO;
 import daw.model.entity.User;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,11 +22,11 @@ import jakarta.servlet.http.HttpSession;
  *
  * @author Javi
  */
-@WebServlet(name = "UserController", urlPatterns = {"/app/login", "/app/registro", "/app/logout", "/app/usuarios", "/user/*", "/users"})
+@WebServlet(name = "UserController", urlPatterns = {"/login", "/registro", "/logout", "/usuarios", "/user/*", "/users"})
 public class UserController extends HttpServlet {
 
     private UserDAO userDAO;
-
+    private static final Logger logger = Logger.getLogger(UserController.class.getName());
     @Override
     public void init() throws ServletException {
         userDAO = new UserDAO();
@@ -53,7 +56,7 @@ public class UserController extends HttpServlet {
         // }
         
 
-
+        logger.log(Level.INFO, "Atendiendo solicitud");
 
         switch (action) {
             case "/users" -> {
@@ -61,17 +64,19 @@ public class UserController extends HttpServlet {
                 request.setAttribute("users",lu);
                 vista = "users";
             }
-            case "/app/login" -> {
-
+            case "/login" -> {
+                logger.log(Level.INFO, "Atendiendo solicitud \"{0}\" ",action);
+                System.out.println("entrando /app/login ");
                 //request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+                response.sendRedirect(request.getContextPath() + "/index.html");
             }
-            case "/app/registro" -> {
+            case "/registro" -> {
                 // si usuario logueado ?
                 //request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
             }
-            case "/app/logout" ->
+            case "/logout" ->
                 logout(request, response);
-            case "/app/usuarios" ->
+            case "/usuarios" ->
                 listUsers(request, response);
             default ->
                 response.sendRedirect(request.getContextPath() + "/index.html");
