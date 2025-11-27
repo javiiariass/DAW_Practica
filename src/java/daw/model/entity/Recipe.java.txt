@@ -24,7 +24,7 @@ import java.util.List;
 @Table(name = "recipes")
 @NamedQueries({
     @NamedQuery(name = "Recipe.findAll", query = "SELECT r FROM Recipe r"),
-    @NamedQuery(name = "Recipe.findByName", query = "SELECT r FROM Recipe r WHERE r.name = :name")
+    @NamedQuery(name = "Recipe.findByName", query = "SELECT r FROM Recipe r WHERE r.title = :title")
 })
 public class Recipe implements Serializable {
 
@@ -36,9 +36,9 @@ public class Recipe implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    String titulo;
-    String descripcion;
-    String instrucciones;
+    String title;
+    String description;
+    String instructions;
     int tiempoMinutos;
     int porciones;
     double calorias; //permite ser nulo

@@ -4,60 +4,78 @@
  */
 package daw.controller;
 
+import daw.model.dao.UserDAO;
+import daw.model.entity.User;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.List;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  *
  * @author Javi
  */
-@WebServlet(name = "UserController", urlPatterns = {"/user/*", "/users"})
+@WebServlet(name = "UserController", urlPatterns = {"/app/login", "/app/registro", "/app/logout", "/app/usuarios", "/user/*", "/users"})
 public class UserController extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet UserController</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet UserController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
+    private UserDAO userDAO;
+
+    @Override
+    public void init() throws ServletException {
+        userDAO = new UserDAO();
     }
-    
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+
+    @Override
+    public void destroy() {
+        userDAO.close();
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String vista;
+        String action = request.getServletPath();
+
+
+
+        //  Lo controlamos en el switch
+        // String accion = "/users";
+        // if (request.getServletPath().equals("/user")) {
+        //     if (request.getPathInfo() != null) {
+        //         accion = request.getPathInfo();
+        //     } else {
+        //         accion = "error";
+        //     }
+        // }
+        
+
+
+
+        switch (action) {
+            case "/users" -> {
+                List <User> lu = userDAO.findAll();
+                request.setAttribute("users",lu);
+                vista = "users";
+            }
+            case "/app/login" -> {
+
+                //request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+            }
+            case "/app/registro" -> {
+                // si usuario logueado ?
+                //request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            }
+            case "/app/logout" ->
+                logout(request, response);
+            case "/app/usuarios" ->
+                listUsers(request, response);
+            default ->
+                response.sendRedirect(request.getContextPath() + "/index.html");
+        }
     }
 
     /**
@@ -71,7 +89,79 @@ public class UserController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+
+        String action = request.getServletPath();
+
+        switch (action) {
+            case "/app/login":
+                login(request, response);
+                break;
+            case "/app/registro":
+                register(request, response);
+                break;
+            default:
+                response.sendRedirect(request.getContextPath() + "/index.html");
+                break;
+        }
+    }
+
+    private void login(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password"); // En MVP es texto plano
+
+        User user = userDAO.findByUsername(username);
+
+        if (user != null && user.getPasswordHash().equals(password)) {
+            HttpSession session = request.getSession();
+            session.setAttribute("user", user);
+            response.sendRedirect(request.getContextPath() + "/index.html");
+        } else {
+            request.setAttribute("error", "Usuario o contraseña incorrectos");
+            request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+        }
+    }
+
+    private void register(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String username = request.getParameter("username");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
+        // Validacion basica
+        if (userDAO.findByUsername(username) != null) {
+            request.setAttribute("error", "El usuario ya existe");
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
+        }
+
+        User newUser = new User(username, email, password);
+        // Por defecto el rol es USER (definido en el constructor/entidad)
+
+        try {
+            userDAO.create(newUser);
+            // Auto-login tras registro
+            HttpSession session = request.getSession();
+            session.setAttribute("user", newUser);
+            response.sendRedirect(request.getContextPath() + "/index.html");
+        } catch (Exception e) {
+            request.setAttribute("error", "Error al registrar: " + e.getMessage());
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+        }
+    }
+
+    private void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        response.sendRedirect(request.getContextPath() + "/index.html");
+    }
+
+    private void listUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        List<User> users = userDAO.findAll();
+        request.setAttribute("users", users);
+        // TODO: Crear vista de lista de usuarios
+        // request.getRequestDispatcher("/WEB-INF/views/user-list.jsp").forward(request, response);
+        response.getWriter().println("Lista de usuarios: " + users.size()); // Temporal
     }
 
     /**
@@ -83,5 +173,4 @@ public class UserController extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
 }
