@@ -19,10 +19,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- *
+ * Atiende "user/login", "user/register", "user/logout", "users"
  * @author Javi
  */
-@WebServlet(name = "UserController", urlPatterns = {"/login", "/registro", "/logout", "/usuarios", "/user/*", "/users"})
+@WebServlet(name = "UserController", urlPatterns = { "/user/*", "/users"})
 public class UserController extends HttpServlet {
 
     private UserDAO userDAO;
@@ -56,7 +56,7 @@ public class UserController extends HttpServlet {
         // }
         
 
-        logger.log(Level.INFO, "Atendiendo solicitud");
+        logger.log(Level.INFO, "Atendiendo solicitud \"{0}\" ",action);
 
         switch (action) {
             case "/users" -> {
@@ -64,20 +64,20 @@ public class UserController extends HttpServlet {
                 request.setAttribute("users",lu);
                 vista = "users";
             }
-            case "/login" -> {
-                logger.log(Level.INFO, "Atendiendo solicitud \"{0}\" ",action);
+            case "/user/login" -> {
+                
                 System.out.println("entrando /app/login ");
                 //request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
                 response.sendRedirect(request.getContextPath() + "/index.html");
             }
-            case "/registro" -> {
+            case "/user/register" -> {
                 // si usuario logueado ?
                 //request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
             }
-            case "/logout" ->
+            case "/user/logout" ->
                 logout(request, response);
-            case "/usuarios" ->
-                listUsers(request, response);
+            case "/user/save" ->{
+            }        
             default ->
                 response.sendRedirect(request.getContextPath() + "/index.html");
         }
@@ -164,9 +164,8 @@ public class UserController extends HttpServlet {
     private void listUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<User> users = userDAO.findAll();
         request.setAttribute("users", users);
-        // TODO: Crear vista de lista de usuarios
-        // request.getRequestDispatcher("/WEB-INF/views/user-list.jsp").forward(request, response);
-        response.getWriter().println("Lista de usuarios: " + users.size()); // Temporal
+        request.getRequestDispatcher("/WEB-INF/views/user-list.jsp").forward(request, response);
+        //response.getWriter().println("Lista de usuarios: " + users.size()); // Temporal
     }
 
     /**

@@ -22,41 +22,29 @@ import java.util.Date;
 @Entity
 @Table(name = "users")
 @NamedQueries({
-    @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
-    @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE u.username = :username")
+        @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
+        @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE u.username = :username")
 })
 public class User implements Serializable {
 
     // ******************* jakarta *******************
     // Se ejecuta antes de persistir en la base de datos
     @PrePersist
-    protected void onCreate(){
+    protected void onCreate() {
         // Establecemos el tiempo de creacion al guardar en la base de datos
         this.createdAt = new Date();
     }
-    
+
     private static final long serialVersionUID = 1L;
-    
-    // ******************* Ctor *******************
-    
-    public User() {
-    }
-    
-    public User(String username, String email, String passwordHash) {
-        this.role = Role.user;
-        this.username = username;
-        this.email = email;
-        this.passwordHash = passwordHash;
-    }
-    
-    
+
     
     // ******************* Fields *******************
-    public enum Role{
+    public enum Role {
         user,
         moderator,
         admin
-    } 
+    }
+
     // PrimaryKey of DB
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -68,7 +56,19 @@ public class User implements Serializable {
     Role role;
     @jakarta.persistence.Temporal(jakarta.persistence.TemporalType.TIMESTAMP)
     Date createdAt; // Fecha creacion cuenta
-    //boolean enabled; // Para gestionar la suspuension de cuentas más adelante
+    // boolean enabled; // Para gestionar la suspuension de cuentas más adelante
+
+    // ******************* Ctor *******************
+
+    public User() {
+    }
+
+    public User(String username, String email, String passwordHash) {
+        this.role = Role.user;
+        this.username = username;
+        this.email = email;
+        this.passwordHash = passwordHash;
+    }
 
     // ******************* Getters & Setters *******************
     public Long getId() {
@@ -99,31 +99,28 @@ public class User implements Serializable {
         return passwordHash;
     }
 
-//    public void setPasswordHash(String passwordHash) {
-//        this.passwordHash = passwordHash;
-//    }
+    // public void setPasswordHash(String passwordHash) {
+    // this.passwordHash = passwordHash;
+    // }
 
-    public void setRole(Role r){
+    public void setRole(Role r) {
         this.role = r;
     }
 
-    public Role getRole(){
+    public Role getRole() {
         return role;
     }
+
     public Date getCreatedAt() {
         return createdAt;
     }
 
-//    public void setCreatedAt(Date createdAt) {
-//        this.createdAt = createdAt;
-//    }
-
-
+    // public void setCreatedAt(Date createdAt) {
+    // this.createdAt = createdAt;
+    // }
 
     // *********************** Methods ***********************
-    
-    
-    
+
     // *********************** Overrides ***********************
     @Override
     public int hashCode() {
