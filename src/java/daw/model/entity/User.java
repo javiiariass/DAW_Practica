@@ -22,8 +22,8 @@ import java.util.Date;
 @Entity
 @Table(name = "users")
 @NamedQueries({
-        @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
-        @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE u.username = :username")
+    @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
+    @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE u.username = :username")
 })
 public class User implements Serializable {
 
@@ -37,13 +37,14 @@ public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    
     // ******************* Fields *******************
     public enum Role {
         user,
         moderator,
         admin
     }
+    // Usar para no permitir celdas nulas
+    // @Column(nullable=false)
 
     // PrimaryKey of DB
     @Id
@@ -59,7 +60,6 @@ public class User implements Serializable {
     // boolean enabled; // Para gestionar la suspuension de cuentas más adelante
 
     // ******************* Ctor *******************
-
     public User() {
     }
 
@@ -99,9 +99,9 @@ public class User implements Serializable {
         return passwordHash;
     }
 
-    // public void setPasswordHash(String passwordHash) {
-    // this.passwordHash = passwordHash;
-    // }
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
 
     public void setRole(Role r) {
         this.role = r;
@@ -115,12 +115,11 @@ public class User implements Serializable {
         return createdAt;
     }
 
-    // public void setCreatedAt(Date createdAt) {
-    // this.createdAt = createdAt;
-    // }
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
 
     // *********************** Methods ***********************
-
     // *********************** Overrides ***********************
     @Override
     public int hashCode() {

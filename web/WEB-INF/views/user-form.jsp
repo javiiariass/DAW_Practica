@@ -6,19 +6,20 @@
     <title>Web App</title>
   </head>
   <body>
-    <h1>Web App</h1>
+    <h1>¡Únete a Culinarius!</h1>
     <h3>Añadir Usuario</h3>
 
-    <form action="/user/save" method="POST">
-      <label for="name">Nombre:</label>
-      <input id="name" type="text" name="name" /><br />
+    <form action="${pageContext.request.contextPath}/user/save" method="POST">
+      <label for="username">Nombre de usuario:</label>
+      <input id="username" type="text" name="username" /><br />
       <label for="email">Correo:</label>
       <input id="email" type="text" name="email" /><br />
-      <label for="phone">Teléfono: </label>
-      <input id="phone" type="text" name="phone" /><br />
-
+      <label for="password">Contraseña:</label>
+      <input id="password" type="text" name="password" /><br />
       <input type="submit" value="Guardar" />
+      
+      
     </form>
-    <a href="/users">Inicio</a>
+    <a href="${pageContext.request.contextPath}">Inicio</a>
   </body>
 </html>

@@ -15,57 +15,10 @@ import java.util.List;
  *
  * @author javi
  */
-public class UserDAO {
+public class UserDAO extends GenericDAO<User> {
     
-    private EntityManagerFactory emf;
-    private EntityManager em;
-
     public UserDAO() {
-        emf = Persistence.createEntityManagerFactory("DAW_PracticaPU");
-        em = emf.createEntityManager();
-    }
-
-    public void create(User user) {
-        try {
-            em.getTransaction().begin();
-            em.persist(user);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
-        }
-    }
-
-    public void edit(User user) {
-        try {
-            em.getTransaction().begin();
-            em.merge(user);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
-        }
-    }
-
-    public void remove(User user) {
-        try {
-            em.getTransaction().begin();
-            em.remove(em.merge(user));
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
-        }
-    }
-
-    public User find(Long id) {
-        return em.find(User.class, id);
+        super(User.class);
     }
 
     public List<User> findAll() {
@@ -81,10 +34,5 @@ public class UserDAO {
         } catch (Exception e) {
             return null;
         }
-    }
-    
-    public void close() {
-        if (em != null) em.close();
-        if (emf != null) emf.close();
     }
 }
