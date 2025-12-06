@@ -3,6 +3,7 @@ package daw.model.dao;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import jakarta.transaction.UserTransaction;
 
 public abstract class GenericDAO<T> {
 
@@ -10,11 +11,19 @@ public abstract class GenericDAO<T> {
     protected static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("DAW_PracticaPU");
     protected EntityManager em;
     private Class<T> entityClass;
+    protected UserTransaction utx;
 
     public GenericDAO(Class<T> entityClass) {
         this.entityClass = entityClass;
         this.em = emf.createEntityManager();
+        this.utx = getUserTransaction();
     }
+
+    // Obtener transacción para JTA
+    private UserTransaction getUserTransaction(){
+        return (UserTransaction)ctx.lookup("java:comp/UserTransaction");
+    }
+
 
     public void create(T entity) {
         try {
