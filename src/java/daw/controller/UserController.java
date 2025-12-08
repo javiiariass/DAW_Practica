@@ -6,6 +6,7 @@ package daw.controller;
 
 import daw.model.dao.UserDAO;
 import daw.model.entity.User;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -27,19 +28,18 @@ import java.util.ArrayList;
 @WebServlet(name = "UserController", urlPatterns = {"/user/*", "/users"})
 public class UserController extends HttpServlet {
 
+    @Inject
     private UserDAO userDAO;
     private static final Logger logger = Logger.getLogger(UserController.class.getName());
 
-    @Override
-    public void init() throws ServletException {
-        userDAO = new UserDAO();
-    }
-
-    @Override
-    public void destroy() {
-        userDAO.close();
-    }
-
+//    @Override
+//    public void init() throws ServletException {
+//        userDAO = new UserDAO();
+//    }
+//    @Override
+//    public void destroy() {
+//        userDAO.close();
+//    }
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -121,7 +121,8 @@ public class UserController extends HttpServlet {
             case "/user/login" ->
                 login(request, response);
             default ->
-                response.sendRedirect(request.getContextPath());
+                //response.sendRedirect(request.getContextPath());
+                response.sendRedirect(request.getServletPath() + "/users");
         }
 
     }
@@ -135,14 +136,25 @@ public class UserController extends HttpServlet {
         if (user != null && user.getPasswordHash().equals(password)) {
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
-            response.sendRedirect(request.getContextPath());
+//            response.sendRedirect(request.getContextPath());
+            response.sendRedirect(request.getServletPath() + "/users");
         } else {
             request.setAttribute("error", "Usuario o contraseña incorrectos");
             request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
         }
     }
 
+    /**
+     * Crea Usuario en el sistema, lo establece como sesión actual.
+     *
+     * @param request
+     * @param response
+     * @throws IOException
+     * @throws ServletException
+     */
     private void register(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+
+        // ------------------- Crear Usuario -------------------
         try {
             // Usando una lista podemos incrementar los elementos a futuro de manera sencilla
             List<String> param = new ArrayList();
@@ -161,7 +173,7 @@ public class UserController extends HttpServlet {
             // Validacion basica para username único
             if (userDAO.findByUsername(param.get(0)) != null) {
                 request.setAttribute("error", "El usuario ya existe");
-                request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/views/user-form.jsp").forward(request, response);
                 return;
             }
 
@@ -169,13 +181,13 @@ public class UserController extends HttpServlet {
             User newUser = new User(param.get(0), param.get(1), param.get(2));
 
             userDAO.create(newUser);
-            // Auto-login tras registro
 
             // Para iniciar sesión
             // HttpSession session = request.getSession();
             // session.setAttribute("user", newUser);
-            response.sendRedirect(request.getServletPath());
-
+            request.setAttribute("exito", "Usuario creado con exito");
+            request.getRequestDispatcher("WEB-INF/views/user-form.jsp").forward(request, response);
+//            response.sendRedirect(request.getServletPath() + "/users");
         } catch (NullPointerException e) {
 
             // Loguear el error técnico

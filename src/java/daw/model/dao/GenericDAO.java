@@ -1,66 +1,81 @@
 package daw.model.dao;
 
+import jakarta.annotation.Resource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.UserTransaction;
+import java.io.Serializable;
 
-public abstract class GenericDAO<T> {
+// Asegurar que el objeto tenga id
+import daw.model.entity.Entitable;
+import jdk.jshell.spi.ExecutionControl;
+
+public abstract class GenericDAO<T extends Entitable<Long>> {
 
     // Factoría estática para compartirla entre todas las instancias y mejorar rendimiento
-    protected static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("DAW_PracticaPU");
+    // protected static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("DAW_PracticaPU");
+    @PersistenceContext(unitName = "DAW_PracticaPU")
     protected EntityManager em;
+
+    // Clase que gestiona el DAO
     private Class<T> entityClass;
+
+    // Recurso que inyecta glassfish con la Unidad de persistencia -> "DAW_PracticaPU"
+    @Resource
     protected UserTransaction utx;
 
     public GenericDAO(Class<T> entityClass) {
         this.entityClass = entityClass;
-        this.em = emf.createEntityManager();
-        this.utx = getUserTransaction();
     }
 
-    // Obtener transacción para JTA
-    private UserTransaction getUserTransaction(){
-        return (UserTransaction)ctx.lookup("java:comp/UserTransaction");
-    }
-
-
-    public void create(T entity) {
+    public void create(T entity){
+        // Si el usuario existe, se modifica.
+        if (entity.getId() != null) {
+            edit(entity);
+            return;
+        }
         try {
-            em.getTransaction().begin();
+            utx.begin();
             em.persist(entity);
-            em.getTransaction().commit();
+            utx.commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
+
+            //utx.rollback();
+            throw new RuntimeException(e);
         }
     }
 
     public void edit(T entity) {
         try {
-            em.getTransaction().begin();
+            utx.begin();
             em.merge(entity);
-            em.getTransaction().commit();
+            utx.commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
+
+            // utx.rollback();
+            throw new RuntimeException(e);
         }
     }
 
     public void remove(T entity) {
+        if (entity.getId() == null) {
+            return;
+        }
         try {
-            em.getTransaction().begin();
-            em.remove(em.merge(entity));
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
+            utx.begin();
+
+            T conectado = em.find(entityClass, entity.getId()); // find puede devolver null si el id existe en el objeto java pero borrado de la BD por otro usuario
+
+            if (conectado != null) {
+                em.remove(conectado);
             }
-            throw e;
+
+            utx.commit();
+        } catch (Exception e) {
+            // utx.rollback();
+            throw new RuntimeException(e);
         }
     }
 
@@ -68,9 +83,4 @@ public abstract class GenericDAO<T> {
         return em.find(entityClass, id);
     }
 
-    public void close() {
-        if (em != null && em.isOpen()) {
-            em.close();
-        }
-    }
 }

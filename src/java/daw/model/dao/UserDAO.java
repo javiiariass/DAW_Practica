@@ -5,9 +5,7 @@
 package daw.model.dao;
 
 import daw.model.entity.User;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.persistence.Query;
 import java.util.List;
 
@@ -15,6 +13,7 @@ import java.util.List;
  *
  * @author javi
  */
+@RequestScoped
 public class UserDAO extends GenericDAO<User> {
     
     public UserDAO() {

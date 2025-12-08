@@ -25,7 +25,7 @@ import java.util.Date;
     @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
     @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE u.username = :username")
 })
-public class User implements Serializable {
+public class User implements Serializable, Entitable<Long> { 
 
     // ******************* jakarta *******************
     // Se ejecuta antes de persistir en la base de datos
