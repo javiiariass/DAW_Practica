@@ -10,6 +10,8 @@ import java.io.Serializable;
 
 // Asegurar que el objeto tenga id
 import daw.model.entity.Entitable;
+import jakarta.transaction.NotSupportedException;
+import jakarta.transaction.SystemException;
 import jdk.jshell.spi.ExecutionControl;
 
 public abstract class GenericDAO<T extends Entitable<Long>> {
@@ -63,10 +65,14 @@ public abstract class GenericDAO<T extends Entitable<Long>> {
         if (entity.getId() == null) {
             return;
         }
+        remove(entity.getId());
+    }
+
+    public void remove(long id){
         try {
             utx.begin();
 
-            T conectado = em.find(entityClass, entity.getId()); // find puede devolver null si el id existe en el objeto java pero borrado de la BD por otro usuario
+            T conectado = em.find(entityClass, id); // find puede devolver null si el id existe en el objeto java pero borrado de la BD por otro usuario
 
             if (conectado != null) {
                 em.remove(conectado);

@@ -23,4 +23,14 @@
       <description>Keep a copy of the generated servlet class' java code.</description>
     </property>
   </jsp-config>
+  
+  <!-- Para que no guarde sesión en archivo (Error en hot-plug cuando se modifican servlets -->
+  <session-config>
+    <session-manager persistence-type="memory">
+      <manager-properties>
+        <property name="sessionFilename" value="" />
+      </manager-properties>
+    </session-manager>
+  </session-config>
+  
 </glassfish-web-app>

@@ -83,6 +83,12 @@ public class UserController extends HttpServlet {
                 // si usuario logueado ?
                 //request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
             }
+            case "/user/edit" ->{
+                
+            }
+            case "/user/remove" ->{
+                
+            }
             case "/user/logout" -> {
                 logout(request, response);
                 vista = "index";
@@ -105,10 +111,11 @@ public class UserController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         logger.log(Level.INFO, "-----------------------------------");
         logger.log(Level.INFO, "Iniciando atención solicitud POST");
         String action = request.getServletPath();
-        logger.log(Level.INFO, "path inicial GET \"{0}\" ", action);
+        logger.log(Level.INFO, "path inicial POST \"{0}\" ", action);
         if (request.getPathInfo() != null) {
             action += request.getPathInfo();
         }
@@ -116,15 +123,22 @@ public class UserController extends HttpServlet {
         logger.log(Level.INFO, "Atendiendo solicitud POST \"{0}\" ", action);
         switch (action) {
             case "/user/save" -> {
-                register(request, response);
+//                response.sendRedirect(request.getContextPath());
+                 register(request, response);
             }
-            case "/user/login" ->
-                login(request, response);
-            default ->
-                //response.sendRedirect(request.getContextPath());
-                response.sendRedirect(request.getServletPath() + "/users");
-        }
+            case "/user/login" -> {
 
+                login(request, response);
+            }
+            default -> {
+                response.sendRedirect(request.getContextPath());
+//                response.sendRedirect(request.getServletPath() + "/users");
+
+            }
+        }
+        logger.log(Level.INFO, "Finalizando atención solicitud POST");
+//        logger.log(Level.INFO, "Mostrando vista \"{0}\"", vista);
+//        request.getRequestDispatcher("/WEB-INF/views/" + vista + ".jsp").forward(request, response);
     }
 
     private void login(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -151,9 +165,12 @@ public class UserController extends HttpServlet {
      * @param response
      * @throws IOException
      * @throws ServletException
+     * @return Devuelve nombre de vista que se debe mostrar
      */
     private void register(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-
+        String vista = "user-list";
+        logger.log(Level.INFO, "-----------------------------------");
+        logger.log(Level.INFO, "Iniciando registro USER");
         // ------------------- Crear Usuario -------------------
         try {
             // Usando una lista podemos incrementar los elementos a futuro de manera sencilla
@@ -166,6 +183,7 @@ public class UserController extends HttpServlet {
             for (String s : param) {
                 if (s.trim().isEmpty()) // trim para evitar que " " sea válido
                 {
+                    logger.log(Level.WARNING, "Campo de formulario vacío");
                     throw new NullPointerException();
                 }
             }
@@ -173,6 +191,9 @@ public class UserController extends HttpServlet {
             // Validacion basica para username único
             if (userDAO.findByUsername(param.get(0)) != null) {
                 request.setAttribute("error", "El usuario ya existe");
+                logger.log(Level.INFO, "Error: Usuario ya existente");
+
+                // Volvemos al formulario con los datos ya rellenados 
                 request.getRequestDispatcher("/WEB-INF/views/user-form.jsp").forward(request, response);
                 return;
             }
@@ -182,25 +203,25 @@ public class UserController extends HttpServlet {
 
             userDAO.create(newUser);
 
-            // Para iniciar sesión
-            // HttpSession session = request.getSession();
-            // session.setAttribute("user", newUser);
-            request.setAttribute("exito", "Usuario creado con exito");
-            request.getRequestDispatcher("WEB-INF/views/user-form.jsp").forward(request, response);
-//            response.sendRedirect(request.getServletPath() + "/users");
+            
         } catch (NullPointerException e) {
 
             // Loguear el error técnico
             logger.log(Level.SEVERE, "Error crítico al registrar usuario", e);
             request.setAttribute("msg", "Error en el formulario: " + e.getMessage());
-            request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+            request.getRequestDispatcher(request.getContextPath() + "/error.jsp").forward(request, response);
         } catch (Exception e) {
             // Loguear el error técnico 
             logger.log(Level.SEVERE, "Error crítico al registrar usuario", e);
             request.setAttribute("msg", "Error al registrar: " + e.getMessage());
-            request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+            request.getRequestDispatcher(request.getContextPath() + "/error.jsp").forward(request, response);
         }
 
+        // Exito
+//        request.setAttribute("exito", "Usuario creado con exito");
+        logger.log(Level.INFO, "Exito: Usuario creado con exito");
+        response.sendRedirect(request.getContextPath() + "/users");
+//        request.getRequestDispatcher(request.getContextPath() + "/users.jsp").forward(request, response);
     }
 
     private void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {

@@ -8,6 +8,8 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
   </head>
   <body>
     <nav>| <a href="${pageContext.request.contextPath}/user/register">Crear Nuevo Usuario</a> |</nav>
+    <nav>| <a href="${pageContext.request.contextPath}/user/remove"> Editar Usuario</a> |</nav>
+    <nav>| <a href="${pageContext.request.contextPath}/user/edit"> Eliminar Usuario</a> |</nav>
     <h1>Web App</h1>
     <c:choose>
       <c:when test="${!empty requestScope.users}">
