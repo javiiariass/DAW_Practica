@@ -78,16 +78,17 @@ public class UserController extends HttpServlet {
                 //response.sendRedirect(request.getContextPath() + "/index.html");
             }
             case "/user/register" -> {
+                request.setAttribute("tipo", "crear");
                 vista = "user-form";
 
                 // si usuario logueado ?
                 //request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
             }
             case "/user/edit" ->{
-                
+                request.setAttribute("tipo", "editar");
             }
             case "/user/remove" ->{
-                
+                request.setAttribute("tipo", "eliminar");
             }
             case "/user/logout" -> {
                 logout(request, response);

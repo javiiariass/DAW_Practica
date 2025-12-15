@@ -4,7 +4,17 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Web App</title>
+    <c:choose>
+      <c:when test = "${request.getAtribute}">
+        <title>Registar usuario</title>
+      </c:when>
+      <c:when tipo="editar">
+        <title>Editar usuario</title>
+      </c:when>
+      <c:when tipo="eliminar">
+        <title>Eliminar usuario</title>
+      </c:when>
+    </c:choose>
   </head>
   <body>
     <h1>¡Únete a Culinarius!</h1>
