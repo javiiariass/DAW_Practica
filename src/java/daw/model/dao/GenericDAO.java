@@ -85,7 +85,7 @@ public abstract class GenericDAO<T extends Entitable<Long>> {
         }
     }
 
-    public T find(Object id) {
+    public T find(long id) {
         return em.find(entityClass, id);
     }
 

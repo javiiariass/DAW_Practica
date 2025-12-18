@@ -18,6 +18,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jdk.internal.net.http.common.Log;
+
 import java.util.ArrayList;
 
 /**
@@ -54,15 +56,6 @@ public class UserController extends HttpServlet {
         }
         logger.log(Level.INFO, "Path completo GET \"{0}\" ", action);
 
-        //  Lo controlamos en el switch
-        // String accion = "/users";
-        // if (request.getServletPath().equals("/user")) {
-        //     if (request.getPathInfo() != null) {
-        //         accion = request.getPathInfo();
-        //     } else {
-        //         accion = "error";
-        //     }
-        // }
         logger.log(Level.INFO, "Atendiendo solicitud GET \"{0}\" ", action);
 
         switch (action) {
@@ -74,8 +67,7 @@ public class UserController extends HttpServlet {
             case "/user/login" -> {
 
                 vista = "login";
-                //request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
-                //response.sendRedirect(request.getContextPath() + "/index.html");
+
             }
             case "/user/register" -> {
                 request.setAttribute("tipo", "crear");
@@ -84,11 +76,14 @@ public class UserController extends HttpServlet {
                 // si usuario logueado ?
                 //request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
             }
-            case "/user/edit" ->{
+            case "/user/edit" -> {
                 request.setAttribute("tipo", "editar");
+                vista = "user-form";
             }
-            case "/user/remove" ->{
-                request.setAttribute("tipo", "eliminar");
+            case "/user/remove" -> {
+                remove(request, response);
+
+                vista = "user-list"; //TODO enviar a jsp info del usuario borrado y mostrar si se pudo borrar o hubo error
             }
             case "/user/logout" -> {
                 logout(request, response);
@@ -98,6 +93,7 @@ public class UserController extends HttpServlet {
                 vista = "error";
             // response.sendRedirect(request.getContextPath() + "/index.html");
         }
+
         request.getRequestDispatcher("/WEB-INF/views/" + vista + ".jsp").forward(request, response);
     }
 
@@ -125,11 +121,14 @@ public class UserController extends HttpServlet {
         switch (action) {
             case "/user/save" -> {
 //                response.sendRedirect(request.getContextPath());
-                 register(request, response);
+                register(request, response);
             }
             case "/user/login" -> {
 
                 login(request, response);
+            }
+            case "/user/edit" -> {
+
             }
             default -> {
                 response.sendRedirect(request.getContextPath());
@@ -144,7 +143,7 @@ public class UserController extends HttpServlet {
 
     private void login(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String username = request.getParameter("username");
-        String password = request.getParameter("password"); // En MVP es texto plano
+        String password = request.getParameter("password");
 
         User user = userDAO.findByUsername(username);
 
@@ -166,7 +165,7 @@ public class UserController extends HttpServlet {
      * @param response
      * @throws IOException
      * @throws ServletException
-     * @return Devuelve nombre de vista que se debe mostrar
+     *
      */
     private void register(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String vista = "user-list";
@@ -204,7 +203,6 @@ public class UserController extends HttpServlet {
 
             userDAO.create(newUser);
 
-            
         } catch (NullPointerException e) {
 
             // Loguear el error técnico
@@ -225,11 +223,41 @@ public class UserController extends HttpServlet {
 //        request.getRequestDispatcher(request.getContextPath() + "/users.jsp").forward(request, response);
     }
 
+    /**
+     * Elimina Usuario del sistema.
+     *
+     * @param request
+     * @param response
+     * @throws IOException
+     * @throws ServletException
+     *
+     */
+    private void remove(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String id_str = request.getParameter("id");
+        Long id;
+        if (id_str != null) {
+            try {
+                id = Long.valueOf(id_str);
+
+                userDAO.remove(userDAO.find(id));
+                request.setAttribute("mensaje", "Usuario eliminado correctamente");
+            } catch (Exception e) {
+                request.setAttribute("error", "Error al eliminar usuario: " + e.getMessage());
+            }
+            
+        } else {
+            logger.log(Level.INFO, "ERROR: Petición no válida");
+            request.setAttribute("error", "Error al eliminar usuario: Petición no válida");
+            
+        }
+    }
+
     private void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
         }
+
     }
 
     private void listUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
