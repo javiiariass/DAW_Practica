@@ -6,9 +6,9 @@ uri="http://java.sun.com/jsp/jstl/core" %>
     <meta charset="UTF-8" />
     <title>
       <c:choose> 
-        <c:when test="${tipo == 'crear'}"> Registrar usuario </c:when>
-        <c:when test="${tipo == 'editar'}"> Editar usuario </c:when> 
-        <c:when test="${tipo == 'eliminar'}"> Eliminar usuario </c:when> 
+        <c:when test="${tipo == 'register'}"> Registrar usuario </c:when>
+        <c:when test="${tipo == 'edit'}"> Editar usuario </c:when> 
+        <c:when test="${tipo == 'remove'}"> Eliminar usuario </c:when> 
       </c:choose>
     </title>
   </head>
@@ -16,7 +16,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
     
       <h1>
       <c:choose>
-          <c:when test="${tipo == 'crear'}">¡Únete a Culinarius!</c:when>
+          <c:when test="${tipo == 'register'}">¡Únete a Culinarius!</c:when>
         <c:otherwise>Culinarius </c:otherwise> 
  
       </c:choose>
@@ -25,8 +25,8 @@ uri="http://java.sun.com/jsp/jstl/core" %>
 
     <h3>
       <c:choose>
-        <c:when test="${tipo == 'crear'}">Añadir Usuario</c:when>
-        <c:when test="${tipo == 'editar'}">Editar Usuario</c:when>
+        <c:when test="${tipo == 'register'}">Añadir Usuario</c:when>
+        <c:when test="${tipo == 'edit'}">Editar Usuario</c:when>
       </c:choose>
     </h3>
 

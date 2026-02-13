@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jdk.internal.net.http.common.Log;
+//import jdk.internal.net.http.common.Log;
 
 import java.util.ArrayList;
 
@@ -119,7 +119,7 @@ public class UserController extends HttpServlet {
 
         logger.log(Level.INFO, "Atendiendo solicitud POST \"{0}\" ", action);
         switch (action) {
-            case "/user/save" -> {
+            case "/user/register" -> {
 //                response.sendRedirect(request.getContextPath());
                 register(request, response);
             }

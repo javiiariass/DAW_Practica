@@ -8,7 +8,7 @@ import daw.model.entity.User;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.persistence.Query;
 import java.util.List;
-
+    
 /**
  *
  * @author javi
